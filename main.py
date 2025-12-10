@@ -83,7 +83,7 @@ class UI01(QDialog):
             {'name': '鶴茶樓', 'attrs': {'booba','jelly','milk','jelly2', 'fruittea','nocoffee'}, 'distance': 450},
             {'name': '有飲', 'attrs': {'booba','milk','nocoffee', 'fruittea','jelly2'}, 'distance': 600},
             {'name': '得正', 'attrs': {'booba','jelly','milk'}, 'distance': 600},
-            {'name': '可不可熟成紅茶', 'attrs': {'booba','milk','nocoffee','jelly'}, 'distance': 600},
+            {'name': '可不可', 'attrs': {'booba','milk','nocoffee','jelly'}, 'distance': 600},
             {'name': '珍煮丹', 'attrs': {'booba','milk','fruittea','coconut','jelly2','jelly'}, 'distance': 3300 },
         ]
 
