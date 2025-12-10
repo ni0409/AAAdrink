@@ -71,15 +71,20 @@ class UI01(QDialog):
             QMessageBox.critical(self, "Result UI not found", f"找不到 result.ui:\n{result_ui_path}")
             return
 
-        # 簡單飲料資料庫（可自行擴充）
+        # 簡單飲料資料庫（可自行擴充）——每項包含 distance（公尺）
         drinks = [
-            {'name': '珍珠奶茶', 'attrs': {'bubble', 'milk'}},
-            {'name': '水果茶（椰果）', 'attrs': {'fruittea', 'coconut'}},
-            {'name': '粉粿鮮奶', 'attrs': {'jelly2', 'milk'}},
-            {'name': '椰果茶凍', 'attrs': {'coconut', 'jelly'}},
-            {'name': '波霸鮮奶', 'attrs': {'booba', 'milk'}},
-            {'name': '無咖啡因水果茶', 'attrs': {'nocoffee', 'fruittea'}},
-            {'name': '純茶（茶凍）', 'attrs': {'jelly'}},
+            {'name': '迷客夏', 'attrs': {'booba', 'milk', 'jelly', 'nocoffee', 'fruittea'}, 'distance': 250},
+            {'name': 'comebuy', 'attrs': {'fruittea', 'coconut','booba','jelly2', 'milk',}, 'distance': 290},
+            {'name': '清心福全', 'attrs': {'jelly','booba','bubble','milk','coconut','nocoffee','fruittea'}, 'distance': 150},
+            {'name': '龜記', 'attrs': {'booba', 'milk', 'coconut','friuttea','nocoffee'}, 'distance': 300},
+            {'name': '一沐日', 'attrs': {'booba', 'milk','nocoffee','jelly2','fruittea'}, 'distance': 750},
+            {'name': '龍角', 'attrs': {'booba', 'milk','nocoffee','coconut','fruittea'}, 'distance': 280},
+            {'name': '五十嵐', 'attrs': {'booba','bubble','nocoffee', 'fruittea','coconut'}, 'distance': 600},
+            {'name': '鶴茶樓', 'attrs': {'booba','jelly','milk','jelly2', 'fruittea','nocoffee'}, 'distance': 450},
+            {'name': '有飲', 'attrs': {'booba','milk','nocoffee', 'fruittea','jelly2'}, 'distance': 600},
+            {'name': '得正', 'attrs': {'booba','jelly','milk'}, 'distance': 600},
+            {'name': '可不可熟成紅茶', 'attrs': {'booba','milk','nocoffee','jelly'}, 'distance': 600},
+            {'name': '珍煮丹', 'attrs': {'booba','milk','fruittea','coconut','jelly2','jelly'}, 'distance': 3300 },
         ]
 
         # 若未提供 required，從主視窗讀取目前 checkbox 狀態
@@ -90,13 +95,27 @@ class UI01(QDialog):
 
         matches = [d for d in drinks if required.issubset(d['attrs'])]
 
-        if matches:
-            chosen = random.choice(matches)
-            note = "符合所有條件"
-        else:
-            chosen = random.choice(drinks)
-            note = "沒有完全符合的結果，已隨機挑選一項"
+        # 權重抽樣：距離越短權重越大。使用 inverse-distance：w = 1 / (distance + eps)
+        def weighted_choice(candidates):
+            eps = 1.0  # 避免距離為 0 的除以零
+            weights = []
+            for c in candidates:
+                dist = c.get('distance', None)
+                if dist is None or dist < 0:
+                    w = 1.0
+                else:
+                    w = 1.0 / (dist + eps)
+                weights.append(w)
+            # random.choices 會根據 weights 做抽樣
+            return random.choices(candidates, weights=weights, k=1)[0]
 
+        if matches:
+            chosen = weighted_choice(matches)
+            note = "符合所有條件（依距離加權選擇）"
+        else:
+            chosen = weighted_choice(drinks)
+            note = "沒有完全符合的結果，已依距離加權隨機挑選一項"
+        
         dlg = QDialog(self)
         uic.loadUi(result_ui_path, dlg)
 
@@ -119,9 +138,16 @@ class UI01(QDialog):
                 f"<p align=\"center\"><span style=\" font-size:28pt; font-weight:700;\">{chosen['name']}</span></p>"
                 f"</body></html>"
             )
+        # result.ui 的 label_2 用來顯示「離女宿距離」，格式化顯示 m 或 km
         if getattr(dlg, 'label_2', None):
-            attrs_text = ", ".join(sorted(chosen['attrs']))
-            dlg.label_2.setText(f"{note}\n屬性：{attrs_text}")
+            dist = chosen.get('distance')
+            if dist is None:
+                dlg.label_2.setText("距離：未知")
+            else:
+                if dist < 1000:
+                    dlg.label_2.setText(f"{dist} m")
+                else:
+                    dlg.label_2.setText(f"{dist/1000:.1f} km")
 
         dlg.exec()
 
