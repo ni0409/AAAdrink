@@ -1,0 +1,12 @@
+<RCC>
+  <qresource prefix="隨便">
+    <file>photo/character_jelly.png</file>
+    <file>photo/drink_milk_pack_cap.png</file>
+    <file>photo/drink_sangria.png</file>
+    <file>photo/drink_tapioca_brown.png</file>
+    <file>photo/drink_ume_juice.png</file>
+    <file>photo/food_natadekoko.png</file>
+    <file>photo/food_nikogori.png</file>
+    <file>photo/main.png</file>
+  </qresource>
+</RCC>
